@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitElite - Dynamic AI Habit Ecosystem</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-amber {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-bolt text-slate-950 font-black text-lg"></i>
+            </div>
+            <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-amber-400 via-rose-400 to-indigo-400 bg-clip-text text-transparent">HabitElite</span>
+        </div>
+        <div id="nav-user-stats" class="hidden flex items-center space-x-3 text-xs font-semibold">
+            <div class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
+                <span>🔥</span>
+                <span id="nav-streak" class="text-amber-400 font-bold">0</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
+                <span>⭐</span>
+                <span id="nav-xp" class="text-emerald-400 font-bold">0 XP</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Frame -->
+    <main class="flex-1 max-w-lg w-full mx-auto p-4 flex flex-col justify-start">
+
+        <!-- 1. AUTH SCREEN -->
+        <div id="auth-screen" class="my-auto space-y-6 glass-card p-7 rounded-3xl shadow-2xl border border-slate-800/80">
+            <div class="text-center space-y-2">
+                <h1 class="text-3xl font-black tracking-tight text-white">Master Consistency 🚀</h1>
+                <p class="text-xs text-slate-400">Production-grade AI Routine & Habit Accountability Engine</p>
+            </div>
+            <div id="phone-group" class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-400 mb-1.5 block font-medium">Mobile Phone Number</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-phone text-slate-500 absolute left-4 top-3.5 text-xs"></i>
+                        <input type="text" id="phone-input" placeholder="e.g. 9876543210" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                </div>
+                <button onclick="sendOTP()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold py-3.5 rounded-2xl transition shadow-lg shadow-amber-500/25 active:scale-98">
+                    Send Verification Code
+                </button>
+            </div>
+            <div id="otp-group" class="space-y-4 hidden">
+                <div>
+                    <label class="text-xs text-slate-400 mb-1.5 block font-medium">Enter OTP Code (Default: 123456)</label>
+                    <input type="text" id="otp-input" placeholder="123456" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-3 text-center tracking-widest text-lg text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <button onclick="verifyOTP()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold py-3.5 rounded-2xl transition shadow-lg shadow-emerald-500/25">
+                    Verify & Unlock Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. PROFILE SETUP -->
+        <div id="profile-screen" class="my-auto space-y-5 glass-card p-7 rounded-3xl border border-slate-800 hidden">
+            <div class="text-center space-y-1">
+                <h2 class="text-2xl font-bold text-white">Create Account 👤</h2>
+                <p class="text-xs text-slate-400">Let's personalize your habit system</p>
+            </div>
+            <div class="space-y-3">
+                <input type="text" id="p-name" placeholder="Full Name" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                <input type="email" id="p-email" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                <input type="number" id="p-age" placeholder="Age" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                <button onclick="saveProfile()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold p-3.5 rounded-xl transition">Continue</button>
+            </div>
+        </div>
+
+        <!-- 3. GOAL SURVEY SCREEN WITH PRE-BUILT SELECTOR -->
+        <div id="survey-screen" class="my-auto space-y-5 glass-card p-7 rounded-3xl border border-slate-800 hidden">
+            <div class="text-center space-y-1">
+                <h2 class="text-2xl font-bold text-white">Choose Your Primary Focus 🎯</h2>
+                <p class="text-xs text-slate-400">Select a pre-built aim or enter your custom target</p>
+            </div>
+
+            <!-- Quick Category Selectors -->
+            <div class="space-y-2">
+                <label class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Popular Goal Presets</label>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button type="button" onclick="selectPresetGoal('💻 Full Stack Web Development')" class="preset-btn bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-left text-slate-300 font-medium transition">
+                        💻 Web Dev Mastery
+                    </button>
+                    <button type="button" onclick="selectPresetGoal('💪 Daily Gym & Fitness Training')" class="preset-btn bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-left text-slate-300 font-medium transition">
+                        💪 Daily Gym & Fitness
+                    </button>
+                    <button type="button" onclick="selectPresetGoal('📖 Daily Reading & Mindful Living')" class="preset-btn bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-left text-slate-300 font-medium transition">
+                        📖 Daily Book Reading
+                    </button>
+                    <button type="button" onclick="selectPresetGoal('🚀 High Focus Deep Work')" class="preset-btn bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-left text-slate-300 font-medium transition">
+                        🚀 Deep Work Routine
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Input Goal -->
+            <div class="space-y-2">
+                <label class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Or Type Custom Goal</label>
+                <input type="text" id="s-goal" placeholder="e.g. Master Data Structures & Algorithms" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-rose-400">
+            </div>
+
+            <button onclick="submitSurvey()" class="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold p-3.5 rounded-xl transition shadow-lg shadow-rose-500/20">
+                Generate AI Routine
+            </button>
+        </div>
+
+        <!-- 4. DASHBOARD -->
+        <div id="dashboard-screen" class="space-y-5 hidden w-full pb-20">
+            
+            <!-- User Banner -->
+            <div class="glass-card p-5 rounded-3xl border border-slate-800 flex justify-between items-center glow-amber">
+                <div>
+                    <h3 id="dash-name" class="font-black text-xl text-white">User</h3>
+                    <p id="dash-goal" class="text-xs text-amber-400 font-medium mt-0.5">Goal loading...</p>
+                </div>
+                <div>
+                    <span id="dash-level" class="text-xs bg-indigo-500/10 text-indigo-400 px-3 py-1.5 rounded-full font-bold border border-indigo-500/20">Beginner 🌿</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 text-xs font-semibold">
+                <button onclick="switchTab('habits')" id="tab-btn-habits" class="flex-1 py-2 rounded-xl bg-slate-800 text-amber-400 font-bold transition">Habits</button>
+                <button onclick="switchTab('squad')" id="tab-btn-squad" class="flex-1 py-2 rounded-xl text-slate-400 hover:text-white transition">Squad</button>
+                <button onclick="switchTab('journal')" id="tab-btn-journal" class="flex-1 py-2 rounded-xl text-slate-400 hover:text-white transition">Journal</button>
+            </div>
+
+            <!-- TAB 1: HABITS VIEW -->
+            <div id="view-habits" class="space-y-4">
+                <!-- Badges -->
+                <div id="badges-container" class="flex space-x-2 overflow-x-auto pb-1"></div>
+
+                <!-- Habits List -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400">Today's Schedule</h4>
+                        <button onclick="openAddHabitModal()" class="text-xs bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 rounded-xl font-bold transition">+ New Habit</button>
+                    </div>
+                    <div id="habits-list" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: SQUAD VIEW -->
+            <div id="view-squad" class="space-y-4 hidden">
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-3">
+                    <h4 class="font-bold text-sm text-white">Friends Accountability Squad 👥</h4>
+                    <p class="text-xs text-slate-400">Create or join a squad to compete on habit streaks!</p>
+                    <div class="flex space-x-2">
+                        <input type="text" id="squad-name-input" placeholder="Squad Name" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                        <button onclick="createSquad()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs">Create Squad</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: DAILY JOURNAL -->
+            <div id="view-journal" class="space-y-4 hidden">
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-3">
+                    <h4 class="font-bold text-sm text-white">Daily Reflection & Mood 📝</h4>
+                    <div class="flex justify-around py-2">
+                        <button onclick="selectMood('🚀 Inspired')" class="text-2xl hover:scale-125 transition">🚀</button>
+                        <button onclick="selectMood('⚡ Energetic')" class="text-2xl hover:scale-125 transition">⚡</button>
+                        <button onclick="selectMood('😐 Neutral')" class="text-2xl hover:scale-125 transition">😐</button>
+                        <button onclick="selectMood('😴 Exhausted')" class="text-2xl hover:scale-125 transition">😴</button>
+                    </div>
+                    <textarea id="journal-note" placeholder="Write about your daily wins or challenges..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white h-20 focus:outline-none"></textarea>
+                    <button onclick="saveJournal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs">Save Journal Entry</button>
+                </div>
+            </div>
+
+            <!-- AI Mentor Chat -->
+            <div class="glass-card border border-slate-800/80 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center space-x-2 border-b border-slate-800/80 pb-2.5">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <span class="text-xs font-bold text-slate-200">AI Habit Coach</span>
+                </div>
+                <div id="chat-box" class="h-28 overflow-y-auto space-y-2 text-xs text-slate-300 p-1">
+                    <div class="bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl">Hello! I am your AI Habit Coach. How are you feeling today?</div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="Ask AI coach..." class="flex-1 bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-400">
+                    <button onclick="sendAIChat()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Send</button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal for Custom Habit -->
+    <div id="habit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="glass-card p-6 rounded-3xl w-full max-w-sm space-y-4 border border-slate-800">
+            <h3 class="font-bold text-white text-base">Add New Custom Habit</h3>
+            <input type="text" id="new-habit-title" placeholder="Habit Title (e.g. Read 15 Mins)" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white">
+            <select id="new-habit-time" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white">
+                <option value="Morning">Morning 🌅</option>
+                <option value="Afternoon">Afternoon ☀️</option>
+                <option value="Evening">Evening 🌙</option>
+            </select>
+            <div class="flex space-x-2">
+                <button onclick="closeAddHabitModal()" class="flex-1 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold">Cancel</button>
+                <button onclick="saveNewHabit()" class="flex-1 bg-amber-500 text-slate-950 py-2.5 rounded-xl text-xs font-bold">Save Habit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Integration -->
+    <script>
+        const API = "http://127.0.0.1:8000/api";
+        let currentPhone = "";
+        let selectedMood = "⚡ Energetic";
+
+        function selectPresetGoal(goalText) {
+            document.getElementById('s-goal').value = goalText;
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('border-amber-400', 'bg-slate-800', 'text-amber-300');
+            });
+            event.currentTarget.classList.add('border-amber-400', 'bg-slate-800', 'text-amber-300');
+        }
+
+        async function sendOTP() {
+            const phone = document.getElementById('phone-input').value;
+            if(!phone) return alert("Enter phone number");
+            const res = await fetch(`${API}/auth/send-otp`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone})
+            });
+            const data = await res.json();
+            if(data.status === 'success') {
+                currentPhone = phone;
+                document.getElementById('phone-group').classList.add('hidden');
+                document.getElementById('otp-group').classList.remove('hidden');
+            }
+        }
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otp-input').value;
+            const res = await fetch(`${API}/auth/verify-otp`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, otp})
+            });
+            const data = await res.json();
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('nav-user-stats').classList.remove('hidden');
+
+            if(!data.is_registered) {
+                document.getElementById('profile-screen').classList.remove('hidden');
+            } else if(!data.has_goal) {
+                document.getElementById('survey-screen').classList.remove('hidden');
+            } else {
+                loadDashboard();
+            }
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('p-name').value;
+            const email = document.getElementById('p-email').value;
+            const age = parseInt(document.getElementById('p-age').value);
+            await fetch(`${API}/profile/save`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, name, email, age})
+            });
+            document.getElementById('profile-screen').classList.add('hidden');
+            document.getElementById('survey-screen').classList.remove('hidden');
+        }
+
+        async function submitSurvey() {
+            const goal = document.getElementById('s-goal').value;
+            if(!goal) return alert("Please select or type a goal");
+            await fetch(`${API}/survey/submit`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, goal})
+            });
+            document.getElementById('survey-screen').classList.add('hidden');
+            loadDashboard();
+        }
+
+        async function loadDashboard() {
+            const res = await fetch(`${API}/dashboard/${currentPhone}`);
+            const data = await res.json();
+
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            document.getElementById('dash-name').innerText = data.user.name;
+            document.getElementById('dash-goal').innerText = "🎯 " + data.user.goal;
+            document.getElementById('dash-level').innerText = data.user.level;
+            document.getElementById('nav-streak').innerText = data.user.streak_count;
+            document.getElementById('nav-xp').innerText = data.user.xp_points + " XP";
+
+            // Render Badges
+            const badgeContainer = document.getElementById('badges-container');
+            badgeContainer.innerHTML = data.badges.map(b => `<span class="bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-[11px] text-amber-400 font-bold flex-shrink-0">${b.badge_icon} ${b.badge_name}</span>`).join('');
+
+            // Render Habits
+            const habitsList = document.getElementById('habits-list');
+            habitsList.innerHTML = data.habits.map(h => `
+                <div class="glass-card border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" ${h.is_completed ? 'checked' : ''} onchange="toggleHabit(${h.id}, this.checked)" class="w-5 h-5 accent-amber-500 rounded-lg cursor-pointer">
+                        <div>
+                            <p class="text-xs font-semibold ${h.is_completed ? 'line-through text-slate-500' : 'text-slate-100'}">${h.title}</p>
+                            <span class="text-[10px] text-slate-400">${h.time_of_day} • ${h.category}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleHabit(habitId, isCompleted) {
+            await fetch(`${API}/habits/update`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({habit_id: habitId, is_completed: isCompleted})
+            });
+            loadDashboard();
+        }
+
+        function switchTab(tab) {
+            ['habits', 'squad', 'journal'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = "flex-1 py-2 rounded-xl text-slate-400 hover:text-white transition";
+            });
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).className = "flex-1 py-2 rounded-xl bg-slate-800 text-amber-400 font-bold transition";
+        }
+
+        function openAddHabitModal() { document.getElementById('habit-modal').classList.remove('hidden'); }
+        function closeAddHabitModal() { document.getElementById('habit-modal').classList.add('hidden'); }
+
+        async function saveNewHabit() {
+            const title = document.getElementById('new-habit-title').value;
+            const timeOfDay = document.getElementById('new-habit-time').value;
+            if(!title) return alert("Enter habit title");
+            await fetch(`${API}/habits/add`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, title, category: 'Custom', time_of_day: timeOfDay})
+            });
+            closeAddHabitModal();
+            loadDashboard();
+        }
+
+        function selectMood(m) { selectedMood = m; alert(`Mood set to: ${m}`); }
+
+        async function saveJournal() {
+            const note = document.getElementById('journal-note').value;
+            if(!note) return alert("Write a note first!");
+            await fetch(`${API}/journal/save`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, mood: selectedMood, note})
+            });
+            alert("Journal Entry Saved!");
+            document.getElementById('journal-note').value = "";
+        }
+
+        async function createSquad() {
+            const squadName = document.getElementById('squad-name-input').value;
+            if(!squadName) return alert("Enter squad name");
+            const res = await fetch(`${API}/squads/create`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, squad_name: squadName})
+            });
+            const data = await res.json();
+            alert(data.message);
+        }
+
+        async function sendAIChat() {
+            const msgInput = document.getElementById('chat-input');
+            const message = msgInput.value;
+            if(!message) return;
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="text-right text-amber-400 font-semibold">You: ${message}</div>`;
+            msgInput.value = "";
+            const res = await fetch(`${API}/ai/chat`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone: currentPhone, message})
+            });
+            const data = await res.json();
+            chatBox.innerHTML += `<div class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-indigo-300">AI: ${data.reply}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
